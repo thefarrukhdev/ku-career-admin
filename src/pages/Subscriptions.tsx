@@ -9,12 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
 
 export default function Subscriptions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { token } = useAuth();
   const [deleteTarget, setDeleteTarget] = useState<Subscription | null>(null);
 
   // ✅ Arizalarni olish
@@ -25,7 +23,7 @@ export default function Subscriptions() {
 
   // ✅ Arizani o'chirish
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => subscriptionService.deleteSubscription(id, token!),
+    mutationFn: (id: string) => subscriptionService.deleteSubscription(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
       toast({

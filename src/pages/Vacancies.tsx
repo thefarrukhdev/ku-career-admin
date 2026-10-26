@@ -7,6 +7,16 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +38,7 @@ export default function Vacancies() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVacancy, setEditingVacancy] = useState<Vacancy | null>(null);
+  const [deletingVacancy, setDeletingVacancy] = useState<Vacancy | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -94,12 +105,6 @@ export default function Vacancies() {
     setEditingVacancy(vacancy);
     reset(vacancy);
     setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm('Ushbu vakansiyani o‘chirishga ishonchingiz komilmi?')) {
-      deleteMutation.mutate(id);
-    }
   };
 
   const filteredVacancies = vacancies.filter((v) =>
@@ -215,7 +220,8 @@ export default function Vacancies() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => vacancy.id && handleDelete(vacancy.id)}
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => setDeletingVacancy(vacancy)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -232,6 +238,32 @@ export default function Vacancies() {
             Vakansiyalar topilmadi
           </div>
         )}
+
+        {/* O'chirishni tasdiqlash dialogi */}
+        <AlertDialog open={!!deletingVacancy} onOpenChange={(open) => !open && setDeletingVacancy(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Vakansiyani o‘chirish</AlertDialogTitle>
+              <AlertDialogDescription>
+                Haqiqatan ham <strong>{deletingVacancy?.title}</strong> vakansiyasini o‘chirmoqchimisiz? Ushbu amalni ortga qaytarib bo‘lmaydi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (deletingVacancy?.id) {
+                    deleteMutation.mutate(deletingVacancy.id);
+                    setDeletingVacancy(null);
+                  }
+                }}
+              >
+                Ha, o‘chirish
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );

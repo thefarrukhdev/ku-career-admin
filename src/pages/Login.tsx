@@ -4,23 +4,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, Mail, Loader2, ExternalLink } from "lucide-react";
+import { Lock, Mail, Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const loginSchema = z.object({
-  email: z.string().email("Noto'g'ri email manzil"),
+  email: z.string().email("Noto'g'ri elektron pochta manzili"),
   password: z
     .string()
     .min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
@@ -30,6 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -47,14 +42,14 @@ export default function Login() {
     try {
       await login(data.email, data.password);
       toast({
-        title: "Muvaffaqiyatli",
+        title: "Xush kelibsiz!",
         description: "Tizimga muvaffaqiyatli kirdingiz",
       });
       navigate("/");
-    } catch (error) {
+    } catch {
       toast({
-        title: "Xato",
-        description: "Noto'g'ri email yoki parol",
+        title: "Kirishda xatolik",
+        description: "Elektron pochta yoki parol noto'g'ri. Iltimos, qaytadan tekshiring.",
         variant: "destructive",
       });
     } finally {
@@ -63,87 +58,132 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      {/* 🔹 Burchakdagi button */}
-      <a
-        href="https://ku-super-admin-panel.lovable.app/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute top-4 right-4"
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 shadow-sm hover:shadow-md transition-all"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Super Admin Panel
-        </Button>
-      </a>
+    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-12 overflow-hidden selection:bg-primary/20">
+      {/* Ambient Burgundy Glow Background Accents */}
+      <div className="absolute top-1/4 -left-32 h-96 w-96 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
 
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <Lock className="h-6 w-6 text-primary" />
+      {/* Top Bar Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
+      {/* Login Card */}
+      <div className="w-full max-w-md relative z-10">
+        <div className="glass-card rounded-2xl p-6 sm:p-8 shadow-2xl border border-border/80 transition-all duration-300">
+          {/* University Branding Header */}
+          <div className="text-center space-y-3 mb-6">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 p-2 shadow-inner">
+              <img
+                src="/ku-white.png"
+                alt="Kokand University"
+                className="hidden dark:block h-10 w-10 object-contain"
+              />
+              <img
+                src="/ku-black.png"
+                alt="Kokand University"
+                className="block dark:hidden h-10 w-10 object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Kokand University
+              </h1>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary mt-0.5">
+                Yagona Boshqaruv Tizimi (CRM)
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Tizimga kirish uchun hisob ma'lumotlaringizni kiriting
+            </p>
           </div>
-          <CardTitle className="text-2xl font-bold">Admin kirish</CardTitle>
-          <CardDescription>
-            CRM tizimiga kirish uchun ma'lumotlaringizni kiriting
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+
+          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            {/* Email Field */}
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-medium text-foreground">
+                Elektron pochta
+              </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@example.com"
-                  className="pl-10"
+                  autoComplete="email"
+                  placeholder="admin@kokanduni.uz"
+                  className="pl-10 h-10 bg-background/50 border-border/80 focus-visible:ring-primary focus-visible:border-primary text-sm rounded-lg"
                   {...register("email")}
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive mt-1">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Parol</Label>
+            {/* Password Field with Show/Hide Toggle */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-xs font-medium text-foreground">
+                  Parol
+                </Label>
+              </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   placeholder="••••••••"
-                  className="pl-10"
+                  className="pl-10 pr-10 h-10 bg-background/50 border-border/80 focus-visible:ring-primary focus-visible:border-primary text-sm rounded-lg"
                   {...register("password")}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                  aria-label={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">
+                <p className="text-xs text-destructive mt-1">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full h-10 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 transition-all rounded-lg mt-2"
+              disabled={isLoading}
+            >
               {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Kirish...
-                </>
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Tekshirilmoqda...
+                </span>
               ) : (
-                "Kirish"
+                "Tizimga kirish"
               )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+
+          {/* Bottom Security Assurance */}
+          <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            <span>Xavfsiz va yagona boshqaruv portali</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

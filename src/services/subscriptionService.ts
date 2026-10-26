@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance, { API_BASE_URL } from './axiosInstance';
 
 export interface Subscription {
   id?: string;
@@ -15,8 +15,6 @@ export interface Subscription {
   updated_at?: string;
   deleted_at?: string | null;
 }
-
-const API_BASE_URL = 'https://univer-production.up.railway.app';
 
 export const subscriptionService = {
   async getSubscriptions(): Promise<Subscription[]> {
@@ -40,13 +38,9 @@ export const subscriptionService = {
     return response.data?.data || response.data;
   },
 
-  // ✅ Arizani o'chirish funksiyasi token bilan
-  async deleteSubscription(id: string, token: string): Promise<{ message: string }> {
-    const response = await axiosInstance.delete(`/subscriptions/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  // ✅ Arizani o'chirish funksiyasi (token axiosInstance interceptor orqali qo'shiladi)
+  async deleteSubscription(id: string, _token?: string): Promise<{ message: string }> {
+    const response = await axiosInstance.delete(`/subscriptions/${id}`);
     return response.data;
   },
 };

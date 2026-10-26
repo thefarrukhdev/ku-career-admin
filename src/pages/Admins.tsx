@@ -112,10 +112,10 @@ export default function Admins() {
             }}
           >
             <DialogTrigger asChild>
-              {/* <Button>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Plus className="mr-2 h-4 w-4" />
                 Admin qo'shish
-              </Button> */}
+              </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
