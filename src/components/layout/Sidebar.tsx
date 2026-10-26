@@ -43,10 +43,10 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       description: "Ish o'rinlari va talablar",
     },
     {
-      name: "Nomzodlar va arizalar",
+      name: "Arizalar",
       href: "/subscriptions",
       icon: Users,
-      description: "Nomzodlar va rezyumelar",
+      description: "Nomzodlar arizalari",
     },
     ...(isSuperAdmin
       ? [
@@ -97,7 +97,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
               Kokand University
             </span>
             <span className="text-xs font-semibold text-primary tracking-wider">
-              ATS & Career Portal
+              Karyera Markazi
             </span>
           </div>
         </div>

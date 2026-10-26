@@ -90,11 +90,11 @@ export default function Login() {
                 Kokand University
               </h1>
               <p className="text-xs font-semibold uppercase tracking-wider text-primary mt-0.5">
-                ATS & Career Portal
+                Karyera Markazi
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Kokand University ATS & Career Portal — Karyera va nomzodlar boshqaruvi tizimiga kirish
+              Boshqaruv tizimiga kirish
             </p>
           </div>
 

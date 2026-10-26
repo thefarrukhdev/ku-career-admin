@@ -32,19 +32,19 @@ interface DashboardLayoutProps {
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/": {
     title: "Boshqaruv paneli",
-    subtitle: "ATS umumiy statistikasi va nomzodlar tahlili",
+    subtitle: "Umumiy statistika va arizalar holati",
   },
   "/vacancies": {
     title: "Vakansiyalar",
-    subtitle: "Universitet bo'yicha e'lon qilingan ish o'rinlari",
+    subtitle: "Bo'sh ish o'rinlari ro'yxati",
   },
   "/subscriptions": {
-    title: "Nomzodlar va arizalar",
-    subtitle: "Nomzodlar tomonidan yuborilgan arizalar va rezyumelar bazasi",
+    title: "Arizalar",
+    subtitle: "Nomzodlar arizalari ro'yxati",
   },
   "/admins": {
     title: "Administratorlar",
-    subtitle: "Tizim ma'murlari va huquqlar boshqaruvi",
+    subtitle: "Tizim administratorlari",
   },
 };
 
@@ -55,8 +55,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, isSuperAdmin, logout } = useAuth();
 
   const currentInfo = pageTitles[location.pathname] || {
-    title: "Kokand University ATS & Career Portal",
-    subtitle: "Nomzodlar va karyera boshqaruv portali",
+    title: "Kokand University",
+    subtitle: "Karyera markazi boshqaruv paneli",
   };
 
   const handleLogout = () => {
