@@ -728,7 +728,7 @@ export default function Dashboard() {
                 <div className="space-y-2 text-xs flex-1">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <span className="h-2 w-2 rounded-full bg-primary" />
+                      <span className="h-2.5 w-2.5 rounded-xs bg-primary" />
                       Faol vakansiyalar
                     </span>
                     <span className="font-bold text-foreground">
@@ -737,7 +737,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <span className="h-2 w-2 rounded-full bg-slate-500" />
+                      <span className="h-2.5 w-2.5 rounded-xs bg-slate-500" />
                       Arxivda / Yopilgan
                     </span>
                     <span className="font-bold text-foreground">
@@ -857,7 +857,6 @@ export default function Dashboard() {
                           variant="outline"
                           className={`text-[10px] h-5 px-1.5 font-medium border ${stageInfo.badgeClass}`}
                         >
-                          <span className={`inline-block h-1.5 w-1.5 rounded-full mr-1 ${stageInfo.dotClass}`} />
                           {stageInfo.label}
                         </Badge>
                         <span className="text-[10px] text-muted-foreground flex items-center gap-1">

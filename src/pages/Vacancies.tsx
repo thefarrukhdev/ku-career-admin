@@ -141,7 +141,7 @@ export default function Vacancies() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [experienceFilter, setExperienceFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   // Dialog States
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -436,10 +436,7 @@ export default function Vacancies() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Faol ish o'rinlari
               </CardTitle>
-              <div className="flex h-2.5 w-2.5 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </div>
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
@@ -691,21 +688,16 @@ export default function Vacancies() {
                       {isActive ? (
                         <Badge
                           variant="secondary"
-                          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs py-0.5 gap-1.5"
+                          className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-xs py-0.5 font-medium"
                         >
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                          </span>
-                          Faol ish o'rni
+                          Faol
                         </Badge>
                       ) : (
                         <Badge
                           variant="outline"
-                          className="bg-muted/50 text-muted-foreground text-xs py-0.5 gap-1.5"
+                          className="bg-muted/50 text-muted-foreground text-xs py-0.5 font-medium"
                         >
-                          <span className="h-2 w-2 rounded-full bg-muted-foreground/60 inline-block" />
-                          Yopilgan / Nofaol
+                          Nofaol
                         </Badge>
                       )}
 
@@ -1006,19 +998,6 @@ export default function Vacancies() {
                     placeholder="Masalan: Kokand University, Qo'qon"
                     {...register("location")}
                   />
-                  {/* Preset chips */}
-                  <div className="flex flex-wrap gap-1 pt-1">
-                    {LOCATION_PRESETS.map((loc) => (
-                      <button
-                        key={loc}
-                        type="button"
-                        onClick={() => setValue("location", loc)}
-                        className="text-[10px] rounded-md bg-muted px-2 py-0.5 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
-                      >
-                        {loc}
-                      </button>
-                    ))}
-                  </div>
                   {errors.location && (
                     <p className="text-xs font-medium text-destructive">{errors.location.message}</p>
                   )}
@@ -1141,12 +1120,12 @@ export default function Vacancies() {
                 <div className="flex items-center justify-between pr-6">
                   <div className="flex items-center gap-2">
                     {previewVacancy.is_active !== false && !previewVacancy.is_deleted ? (
-                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs">
-                        Faol ish o'rni
+                      <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-medium">
+                        Faol
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-muted-foreground text-xs">
-                        Yopilgan / Nofaol
+                      <Badge variant="outline" className="text-muted-foreground text-xs font-medium">
+                        Nofaol
                       </Badge>
                     )}
                     <span className="text-xs text-muted-foreground">

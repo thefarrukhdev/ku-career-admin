@@ -92,7 +92,6 @@ import {
 interface StatusMeta {
   label: string;
   badgeClass: string;
-  dotClass: string;
   icon: typeof Sparkles;
 }
 
@@ -101,35 +100,30 @@ const STATUS_CONFIG: Record<CandidateStatus, StatusMeta> = {
     label: "Yangi",
     badgeClass:
       "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
-    dotClass: "bg-blue-500",
     icon: Sparkles,
   },
   reviewing: {
     label: "Ko'rib chiqilmoqda",
     badgeClass:
       "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
-    dotClass: "bg-amber-500",
     icon: Clock,
   },
   interview: {
     label: "Suhbatda",
     badgeClass:
       "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800",
-    dotClass: "bg-purple-500",
     icon: MessageSquare,
   },
   accepted: {
     label: "Qabul qilindi",
     badgeClass:
       "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800",
-    dotClass: "bg-emerald-500",
     icon: CheckCircle2,
   },
   rejected: {
     label: "Rad etildi",
     badgeClass:
       "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800",
-    dotClass: "bg-rose-500",
     icon: XCircle,
   },
 };
@@ -479,56 +473,46 @@ export default function Subscriptions() {
           </div>
         </div>
 
-        {/* Pipeline KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <Card
+        {/* Status Filter Tabs (Clean, Modern, No Clutter) */}
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-muted/40 border border-border/60">
+          <button
+            type="button"
             onClick={() => setSelectedStatus("all")}
             className={cn(
-              "cursor-pointer transition-all hover:shadow-md border-l-4 border-l-slate-400",
+              "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2",
               selectedStatus === "all"
-                ? "ring-2 ring-primary ring-offset-2 bg-accent/40"
-                : "hover:bg-muted/30"
+                ? "bg-background text-foreground shadow-xs font-semibold"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
             )}
           >
-            <CardContent className="p-3.5">
-              <div className="text-xs font-medium text-muted-foreground">Barcha arizalar</div>
-              <div className="text-2xl font-bold mt-1 text-foreground">
-                {isLoading ? <Skeleton className="h-7 w-12" /> : statusCounts.all}
-              </div>
-            </CardContent>
-          </Card>
+            <span>Barchasi</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">
+              {isLoading ? "-" : statusCounts.all}
+            </span>
+          </button>
 
           {STATUS_KEYS.map((key) => {
             const meta = STATUS_CONFIG[key];
-            const Icon = meta.icon;
             const isSelected = selectedStatus === key;
+            const count = statusCounts[key] || 0;
 
             return (
-              <Card
+              <button
                 key={key}
+                type="button"
                 onClick={() => setSelectedStatus(key)}
                 className={cn(
-                  "cursor-pointer transition-all hover:shadow-md border-l-4",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2",
                   isSelected
-                    ? "ring-2 ring-primary ring-offset-2 bg-accent/40"
-                    : "hover:bg-muted/30",
-                  key === "new" && "border-l-blue-500",
-                  key === "reviewing" && "border-l-amber-500",
-                  key === "interview" && "border-l-purple-500",
-                  key === "accepted" && "border-l-emerald-500",
-                  key === "rejected" && "border-l-rose-500"
+                    ? "bg-background text-foreground shadow-xs font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
                 )}
               >
-                <CardContent className="p-3.5">
-                  <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-                    <span className="truncate">{meta.label}</span>
-                    <Icon className="w-3.5 h-3.5 opacity-70" />
-                  </div>
-                  <div className="text-2xl font-bold mt-1 text-foreground">
-                    {isLoading ? <Skeleton className="h-7 w-10" /> : statusCounts[key] || 0}
-                  </div>
-                </CardContent>
-              </Card>
+                <span>{meta.label}</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">
+                  {isLoading ? "-" : count}
+                </span>
+              </button>
             );
           })}
         </div>
@@ -576,25 +560,7 @@ export default function Subscriptions() {
                 </Select>
               </div>
 
-              {/* Status Filter Select (for quick dropdown switch) */}
-              <div className="w-full lg:w-56">
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Barcha statuslar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Barcha statuslar ({statusCounts.all})</SelectItem>
-                    {STATUS_KEYS.map((key) => (
-                      <SelectItem key={key} value={key}>
-                        <div className="flex items-center gap-2">
-                          <span className={cn("w-2 h-2 rounded-full", STATUS_CONFIG[key].dotClass)} />
-                          <span>{STATUS_CONFIG[key].label} ({statusCounts[key] || 0})</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
 
               {/* Reset Filters button */}
               {hasActiveFilters && (
@@ -818,7 +784,6 @@ export default function Subscriptions() {
                                     statusMeta.badgeClass
                                   )}
                                 >
-                                  <span className={cn("w-2 h-2 rounded-full", statusMeta.dotClass)} />
                                   <span>{statusMeta.label}</span>
                                   <ChevronDown className="w-3 h-3 opacity-60 ml-0.5" />
                                 </button>
@@ -840,9 +805,6 @@ export default function Subscriptions() {
                                       }
                                       className="flex items-center gap-2 text-xs cursor-pointer"
                                     >
-                                      <span
-                                        className={cn("w-2 h-2 rounded-full", itemMeta.dotClass)}
-                                      />
                                       <span className="flex-1">{itemMeta.label}</span>
                                       {isCurrent && (
                                         <Check className="w-3.5 h-3.5 text-primary ml-auto" />
@@ -1017,15 +979,7 @@ export default function Subscriptions() {
                     <SelectContent>
                       {STATUS_KEYS.map((st) => (
                         <SelectItem key={st} value={st}>
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={cn(
-                                "w-2 h-2 rounded-full",
-                                STATUS_CONFIG[st].dotClass
-                              )}
-                            />
-                            <span>{STATUS_CONFIG[st].label}</span>
-                          </div>
+                          <span>{STATUS_CONFIG[st].label}</span>
                         </SelectItem>
                       ))}
                     </SelectContent>

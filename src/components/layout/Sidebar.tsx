@@ -96,12 +96,9 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
             <span className="font-bold text-sm tracking-tight text-foreground truncate">
               Kokand University
             </span>
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                ATS & Career Portal
-              </span>
-            </div>
+            <span className="text-xs font-semibold text-primary tracking-wider">
+              ATS & Career Portal
+            </span>
           </div>
         </div>
 
