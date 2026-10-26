@@ -48,6 +48,8 @@ import {
   X,
   Briefcase,
   Eye,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
@@ -65,6 +67,7 @@ export default function Vacancies() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVacancy, setEditingVacancy] = useState<Vacancy | null>(null);
   const [deletingVacancy, setDeletingVacancy] = useState<Vacancy | null>(null);
@@ -210,26 +213,54 @@ export default function Vacancies() {
           </Button>
         </div>
 
-        {/* Qidiruv qatori */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Vakansiya sarlavhasi yoki tavsifi bo'yicha qidirish..."
-            value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-9 pr-9"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => handleSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        {/* Qidiruv va ko'rinish tanlash */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Vakansiya sarlavhasi yoki tavsifi bo'yicha qidirish..."
+              value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => handleSearchChange("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Grid vs Table Ko'rinish tugmalari */}
+          <div className="flex items-center rounded-lg border border-border/70 bg-muted/30 p-0.5 self-end sm:self-auto shrink-0">
+            <Button
+              type="button"
+              variant={viewMode === "grid" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="h-8 px-2.5 gap-1.5 text-xs font-medium"
+              title="Katakchalar (Grid) ko'rinishi"
             >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Kataklar</span>
+            </Button>
+            <Button
+              type="button"
+              variant={viewMode === "table" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="h-8 px-2.5 gap-1.5 text-xs font-medium"
+              title="Jadval (Table) ko'rinishi"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Jadval</span>
+            </Button>
+          </div>
         </div>
 
-        {/* Vakansiyalar jadvali */}
+        {/* Vakansiyalar ro'yxati (Grid yoki Table) */}
         <Card className="border-border/70 overflow-hidden shadow-xs">
           <CardHeader className="py-3 px-5 border-b bg-muted/20 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-medium">
@@ -248,7 +279,80 @@ export default function Vacancies() {
                   {searchTerm ? "Qidiruv bo'yicha vakansiya topilmadi" : "Hozircha vakansiyalar mavjud emas"}
                 </p>
               </div>
+            ) : viewMode === "grid" ? (
+              /* GRID KO'RINIShI */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                {paginatedItems.map((vacancy, index) => {
+                  const rowNum = startIndex + index + 1;
+                  return (
+                    <div
+                      key={vacancy.id || index}
+                      className="rounded-xl border border-border/70 bg-card p-4 flex flex-col justify-between hover:border-primary/40 hover:shadow-xs transition-all duration-200"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3
+                            onClick={() => setPreviewVacancy(vacancy)}
+                            className="font-semibold text-sm text-foreground hover:text-primary cursor-pointer line-clamp-1 leading-snug"
+                          >
+                            {vacancy.title}
+                          </h3>
+                          <span className="text-[11px] font-mono text-muted-foreground/70 shrink-0">
+                            #{rowNum}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+                          {vacancy.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {vacancy.created_at
+                            ? new Date(vacancy.created_at).toLocaleDateString("uz-UZ", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                              })
+                            : "—"}
+                        </span>
+
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreviewVacancy(vacancy)}
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                            title="Ko'rish"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenEdit(vacancy)}
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                            title="Tahrirlash"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeletingVacancy(vacancy)}
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            title="O'chirish"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
+              /* JADVAL (TABLE) KO'RINIShI */
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
