@@ -90,11 +90,11 @@ export default function Login() {
                 Kokand University
               </h1>
               <p className="text-xs font-semibold uppercase tracking-wider text-primary mt-0.5">
-                Yagona Boshqaruv Tizimi (CRM)
+                ATS & Career Portal
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Tizimga kirish uchun hisob ma'lumotlaringizni kiriting
+              Kokand University ATS & Career Portal — Karyera va nomzodlar boshqaruvi tizimiga kirish
             </p>
           </div>
 
@@ -180,7 +180,7 @@ export default function Login() {
           {/* Bottom Security Assurance */}
           <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            <span>Xavfsiz va yagona boshqaruv portali</span>
+            <span>Xavfsiz Kokand University ATS & Career boshqaruv portali</span>
           </div>
         </div>
       </div>

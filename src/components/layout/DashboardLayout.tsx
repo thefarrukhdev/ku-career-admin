@@ -32,15 +32,15 @@ interface DashboardLayoutProps {
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/": {
     title: "Boshqaruv paneli",
-    subtitle: "Tizim umumiy statistikasi va ko'rsatkichlar",
+    subtitle: "ATS umumiy statistikasi va nomzodlar tahlili",
   },
   "/vacancies": {
     title: "Vakansiyalar",
     subtitle: "Universitet bo'yicha e'lon qilingan ish o'rinlari",
   },
   "/subscriptions": {
-    title: "Arizalar",
-    subtitle: "Nomzodlar tomonidan yuborilgan arizalar bazasi",
+    title: "Nomzodlar va arizalar",
+    subtitle: "Nomzodlar tomonidan yuborilgan arizalar va rezyumelar bazasi",
   },
   "/admins": {
     title: "Administratorlar",
@@ -55,8 +55,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, isSuperAdmin, logout } = useAuth();
 
   const currentInfo = pageTitles[location.pathname] || {
-    title: "Kokand University CRM",
-    subtitle: "Boshqaruv tizimi",
+    title: "Kokand University ATS & Career Portal",
+    subtitle: "Nomzodlar va karyera boshqaruv portali",
   };
 
   const handleLogout = () => {
@@ -109,7 +109,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 to="/"
                 className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-flex items-center gap-1 font-medium text-xs"
               >
-                CRM
+                ATS Portal
               </Link>
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60 hidden sm:inline-block" />
               <span className="font-semibold text-foreground text-sm truncate">
@@ -183,7 +183,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuItem asChild>
                   <Link to="/subscriptions" className="cursor-pointer flex items-center gap-2 text-xs">
                     <Users className="h-3.5 w-3.5" />
-                    Arizalar
+                    Nomzodlar va arizalar
                   </Link>
                 </DropdownMenuItem>
                 {isSuperAdmin && (

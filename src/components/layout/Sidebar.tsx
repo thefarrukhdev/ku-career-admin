@@ -43,7 +43,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       description: "Ish o'rinlari va talablar",
     },
     {
-      name: "Arizalar",
+      name: "Nomzodlar va arizalar",
       href: "/subscriptions",
       icon: Users,
       description: "Nomzodlar va rezyumelar",
@@ -99,7 +99,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
             <div className="flex items-center gap-1.5">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                CRM Portal
+                ATS & Career Portal
               </span>
             </div>
           </div>
