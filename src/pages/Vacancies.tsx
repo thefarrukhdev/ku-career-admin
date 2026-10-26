@@ -74,7 +74,6 @@ import {
   ExternalLink,
   LayoutGrid,
   List,
-  Sparkles,
   X,
   FileText,
   Building2,
@@ -82,7 +81,8 @@ import {
   XCircle,
   HelpCircle,
   FilterX,
-  Layers,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 // ============================================================================
@@ -101,6 +101,8 @@ type VacancyFormData = z.infer<typeof vacancySchema>;
 
 type StatusFilter = "all" | "active" | "inactive";
 type ViewMode = "grid" | "table";
+
+const ITEMS_PER_PAGE = 10;
 
 const EXPERIENCE_OPTIONS = [
   "Talab etilmaydi",
@@ -142,6 +144,7 @@ export default function Vacancies() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [experienceFilter, setExperienceFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Dialog States
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -344,7 +347,7 @@ export default function Vacancies() {
   // ==========================================================================
   const filteredVacancies = useMemo(() => {
     return vacancies.filter((v) => {
-      // 1. Search term match (title, description, location)
+      // 1. Search term match (title, description, location, requirement)
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase();
         const matchesTitle = v.title.toLowerCase().includes(q);
@@ -374,6 +377,50 @@ export default function Vacancies() {
     });
   }, [vacancies, searchTerm, statusFilter, experienceFilter]);
 
+  // ==========================================================================
+  // PAGINATION LOGIC
+  // ==========================================================================
+  const totalItems = filteredVacancies.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedVacancies = useMemo(() => {
+    const startIndex = (validCurrentPage - 1) * ITEMS_PER_PAGE;
+    return filteredVacancies.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredVacancies, validCurrentPage]);
+
+  const startIndex = totalItems === 0 ? 0 : (validCurrentPage - 1) * ITEMS_PER_PAGE + 1;
+  const endIndex = Math.min(validCurrentPage * ITEMS_PER_PAGE, totalItems);
+
+  const getPageNumbers = (): (number | "ellipsis")[] => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (validCurrentPage <= 4) {
+      return [1, 2, 3, 4, 5, "ellipsis", totalPages];
+    }
+    if (validCurrentPage >= totalPages - 3) {
+      return [
+        1,
+        "ellipsis",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    }
+    return [
+      1,
+      "ellipsis",
+      validCurrentPage - 1,
+      validCurrentPage,
+      validCurrentPage + 1,
+      "ellipsis",
+      totalPages,
+    ];
+  };
+
   const hasActiveFilters =
     searchTerm.trim() !== "" || statusFilter !== "all" || experienceFilter !== "all";
 
@@ -381,6 +428,7 @@ export default function Vacancies() {
     setSearchTerm("");
     setStatusFilter("all");
     setExperienceFilter("all");
+    setCurrentPage(1);
   };
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -391,21 +439,16 @@ export default function Vacancies() {
         {/* ================================================================= */}
         {/* PAGE HEADER                                                       */}
         {/* ================================================================= */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-bold tracking-tight">Vakansiyalar</h1>
-              <Badge variant="outline" className="font-semibold text-xs py-0.5">
-                ATS Recruitment
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Vakansiyalar</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               Kokand University ish o'rinlarini yaratish, tahrirlash va arizalar oqimini nazorat qilish
             </p>
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Button onClick={handleOpenCreate} className="gap-2 shadow-xs">
+            <Button onClick={handleOpenCreate} className="w-full sm:w-auto gap-2 shadow-xs">
               <Plus className="h-4 w-4" />
               Yangi vakansiya qo'shish
             </Button>
@@ -415,51 +458,51 @@ export default function Vacancies() {
         {/* ================================================================= */}
         {/* KPI / STATS SUMMARY CARDS                                         */}
         {/* ================================================================= */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
           <Card className="border-border/60 shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Jami vakansiyalar
               </CardTitle>
-              <Briefcase className="h-4 w-4 text-primary" />
+              <Briefcase className="h-4 w-4 text-primary shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metrics.total}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{metrics.total}</div>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 truncate">
                 Barcha e'lon qilingan lavozimlar
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-border/60 shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Faol ish o'rinlari
               </CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {metrics.active}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 truncate">
                 Arizalar qabul qilinmoqda
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-border/60 shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Yopilgan / Nofaol
               </CardTitle>
-              <XCircle className="h-4 w-4 text-muted-foreground" />
+              <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-muted-foreground">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-muted-foreground">
                 {metrics.inactive}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 truncate">
                 Vaqtincha to'xtatilgan
               </p>
             </CardContent>
@@ -469,18 +512,18 @@ export default function Vacancies() {
             onClick={() => navigate("/subscriptions")}
             className="border-border/60 shadow-xs hover:border-primary/50 cursor-pointer transition-colors group"
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
                 Jami nomzodlar
               </CardTitle>
-              <Users className="h-4 w-4 text-primary" />
+              <Users className="h-4 w-4 text-primary shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary flex items-center justify-between">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-primary flex items-center justify-between">
                 <span>{metrics.totalCandidates}</span>
                 <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 truncate">
                 Barcha arizalarni ko'rish &rarr;
               </p>
             </CardContent>
@@ -490,34 +533,45 @@ export default function Vacancies() {
         {/* ================================================================= */}
         {/* SEARCH, FILTER TABS & VIEW TOGGLE                                 */}
         {/* ================================================================= */}
-        <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-xs">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 sm:p-4 shadow-xs">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 w-full lg:max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Vakansiya sarlavhasi, talab yoki tavsif bo'yicha qidirish..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-9"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-9 pr-9 text-xs sm:text-sm"
               />
               {searchTerm && (
                 <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setCurrentPage(1);
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                  aria-label="Qidiruvni tozalash"
                 >
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
 
-            {/* Experience Select Filter */}
-            <div className="flex items-center gap-2">
+            {/* Experience Select Filter & View Switcher */}
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto">
               <Select
                 value={experienceFilter}
-                onValueChange={(val) => setExperienceFilter(val)}
+                onValueChange={(val) => {
+                  setExperienceFilter(val);
+                  setCurrentPage(1);
+                }}
               >
-                <SelectTrigger className="w-[180px] text-xs">
+                <SelectTrigger className="w-full sm:w-[190px] text-xs">
                   <SelectValue placeholder="Tajriba talabi" />
                 </SelectTrigger>
                 <SelectContent>
@@ -531,22 +585,26 @@ export default function Vacancies() {
               </Select>
 
               {/* View Switcher */}
-              <div className="flex items-center rounded-lg border bg-muted/40 p-0.5">
+              <div className="flex items-center rounded-lg border bg-muted/40 p-0.5 shrink-0">
                 <Button
+                  type="button"
                   size="sm"
                   variant={viewMode === "grid" ? "secondary" : "ghost"}
                   className="h-8 px-2.5"
                   onClick={() => setViewMode("grid")}
                   title="Kartochkalar ko'rinishi"
+                  aria-label="Kartochkalar ko'rinishi"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
                 <Button
+                  type="button"
                   size="sm"
                   variant={viewMode === "table" ? "secondary" : "ghost"}
                   className="h-8 px-2.5"
                   onClick={() => setViewMode("table")}
                   title="Jadval ko'rinishi"
+                  aria-label="Jadval ko'rinishi"
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -558,18 +616,21 @@ export default function Vacancies() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t">
             <Tabs
               value={statusFilter}
-              onValueChange={(val) => setStatusFilter(val as StatusFilter)}
-              className="w-auto"
+              onValueChange={(val) => {
+                setStatusFilter(val as StatusFilter);
+                setCurrentPage(1);
+              }}
+              className="w-full sm:w-auto"
             >
-              <TabsList className="h-9">
-                <TabsTrigger value="all" className="text-xs px-3">
+              <TabsList className="h-9 w-full sm:w-auto grid grid-cols-3 sm:flex">
+                <TabsTrigger value="all" className="text-xs px-2 sm:px-3">
                   Barchasi ({vacancies.length})
                 </TabsTrigger>
-                <TabsTrigger value="active" className="text-xs px-3">
-                  Faol ish o'rinlari ({metrics.active})
+                <TabsTrigger value="active" className="text-xs px-2 sm:px-3">
+                  Faol <span className="hidden sm:inline">ish o'rinlari</span> ({metrics.active})
                 </TabsTrigger>
-                <TabsTrigger value="inactive" className="text-xs px-3">
-                  Yopilgan / Nofaol ({metrics.inactive})
+                <TabsTrigger value="inactive" className="text-xs px-2 sm:px-3">
+                  Nofaol <span className="hidden sm:inline">/ Yopilgan</span> ({metrics.inactive})
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -593,7 +654,7 @@ export default function Vacancies() {
         {/* ================================================================= */}
         {isLoadingVacancies ? (
           /* Loading Skeleton */
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="border-border/60">
                 <CardHeader className="space-y-2">
@@ -672,8 +733,8 @@ export default function Vacancies() {
           </Card>
         ) : viewMode === "grid" ? (
           /* Card Grid View */
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredVacancies.map((vacancy) => {
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedVacancies.map((vacancy) => {
               const candidateCount = getCandidateCount(vacancy.id);
               const isActive = vacancy.is_active !== false && !vacancy.is_deleted;
 
@@ -719,7 +780,8 @@ export default function Vacancies() {
 
                     {/* Title & Metadata */}
                     <div>
-                      <CardTitle className="text-lg font-bold leading-snug line-clamp-2 hover:text-primary transition-colors cursor-pointer"
+                      <CardTitle
+                        className="text-base sm:text-lg font-bold leading-snug line-clamp-2 hover:text-primary transition-colors cursor-pointer"
                         onClick={() => setPreviewVacancy(vacancy)}
                       >
                         {vacancy.title}
@@ -727,7 +789,9 @@ export default function Vacancies() {
                       <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mt-2">
                         <span className="inline-flex items-center gap-1 text-muted-foreground">
                           <MapPin className="h-3.5 w-3.5 text-primary/70 shrink-0" />
-                          <span className="truncate max-w-[140px]">{vacancy.location || "Kokand University"}</span>
+                          <span className="truncate max-w-[140px]">
+                            {vacancy.location || "Kokand University"}
+                          </span>
                         </span>
                         <span className="inline-flex items-center gap-1 text-muted-foreground">
                           <Briefcase className="h-3.5 w-3.5 text-primary/70 shrink-0" />
@@ -776,6 +840,7 @@ export default function Vacancies() {
                   {/* Actions Footer */}
                   <CardFooter className="flex items-center justify-between pt-3 border-t bg-muted/10">
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="text-xs h-8 gap-1.5 px-2"
@@ -787,6 +852,7 @@ export default function Vacancies() {
 
                     <div className="flex items-center gap-1.5">
                       <Button
+                        type="button"
                         size="sm"
                         variant="outline"
                         className="h-8 px-2.5 text-xs gap-1"
@@ -798,6 +864,7 @@ export default function Vacancies() {
                       </Button>
 
                       <Button
+                        type="button"
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -813,127 +880,209 @@ export default function Vacancies() {
             })}
           </div>
         ) : (
-          /* Table View Mode */
-          <div className="rounded-xl border bg-card overflow-hidden shadow-xs">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[30%]">Vakansiya sarlavhasi</TableHead>
-                  <TableHead>Joylashuv</TableHead>
-                  <TableHead>Tajriba</TableHead>
-                  <TableHead>Holati</TableHead>
-                  <TableHead>Nomzodlar</TableHead>
-                  <TableHead>Yaratilgan</TableHead>
-                  <TableHead className="text-right">Harakatlar</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredVacancies.map((vacancy) => {
-                  const candidateCount = getCandidateCount(vacancy.id);
-                  const isActive = vacancy.is_active !== false && !vacancy.is_deleted;
+          /* Table View Mode with horizontal scroll container */
+          <div className="rounded-xl border bg-card shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[720px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30%] min-w-[200px]">Vakansiya sarlavhasi</TableHead>
+                    <TableHead className="min-w-[130px]">Joylashuv</TableHead>
+                    <TableHead className="min-w-[110px]">Tajriba</TableHead>
+                    <TableHead className="min-w-[100px]">Holati</TableHead>
+                    <TableHead className="min-w-[100px]">Nomzodlar</TableHead>
+                    <TableHead className="min-w-[110px]">Yaratilgan</TableHead>
+                    <TableHead className="min-w-[110px] text-right">Harakatlar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedVacancies.map((vacancy) => {
+                    const candidateCount = getCandidateCount(vacancy.id);
+                    const isActive = vacancy.is_active !== false && !vacancy.is_deleted;
 
-                  return (
-                    <TableRow key={vacancy.id} className="hover:bg-muted/40 transition-colors">
-                      <TableCell>
-                        <div className="font-semibold text-sm hover:text-primary cursor-pointer line-clamp-1"
-                          onClick={() => setPreviewVacancy(vacancy)}
-                        >
-                          {vacancy.title}
-                        </div>
-                        <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                          {vacancy.description}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-primary/70 shrink-0" />
-                          {vacancy.location || "Kokand University"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        <Badge variant="outline" className="font-normal text-[11px]">
-                          {vacancy.experience || "Talab etilmaydi"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={isActive}
-                            disabled={toggleStatusMutation.isPending}
-                            onCheckedChange={(checked) => {
+                    return (
+                      <TableRow key={vacancy.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell>
+                          <div
+                            className="font-semibold text-sm hover:text-primary cursor-pointer line-clamp-1"
+                            onClick={() => setPreviewVacancy(vacancy)}
+                          >
+                            {vacancy.title}
+                          </div>
+                          <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                            {vacancy.description}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-primary/70 shrink-0" />
+                            <span className="truncate max-w-[140px]">
+                              {vacancy.location || "Kokand University"}
+                            </span>
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <Badge variant="outline" className="font-normal text-[11px]">
+                            {vacancy.experience || "Talab etilmaydi"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={isActive}
+                              disabled={toggleStatusMutation.isPending}
+                              onCheckedChange={(checked) => {
+                                if (vacancy.id) {
+                                  toggleStatusMutation.mutate({
+                                    id: vacancy.id,
+                                    is_active: checked,
+                                  });
+                                }
+                              }}
+                            />
+                            <span className="text-xs text-muted-foreground hidden sm:inline">
+                              {isActive ? "Faol" : "Nofaol"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
                               if (vacancy.id) {
-                                toggleStatusMutation.mutate({
-                                  id: vacancy.id,
-                                  is_active: checked,
-                                });
+                                navigate(`/subscriptions?vacancyId=${vacancy.id}`);
                               }
                             }}
-                          />
-                          <span className="text-xs text-muted-foreground hidden sm:inline">
-                            {isActive ? "Faol" : "Nofaol"}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (vacancy.id) {
-                              navigate(`/subscriptions?vacancyId=${vacancy.id}`);
-                            }
-                          }}
-                          className={`h-7 text-xs font-semibold gap-1.5 px-2 ${
-                            candidateCount > 0
-                              ? "border-primary/40 bg-primary/5 text-primary hover:bg-primary/15"
-                              : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          <Users className="h-3.5 w-3.5 text-primary" />
-                          <span>{candidateCount}</span>
-                          <ExternalLink className="h-3 w-3 opacity-60" />
-                        </Button>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {formatDate(vacancy.created_at)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={() => setPreviewVacancy(vacancy)}
-                            title="Batafsil ko'rish"
+                            className={`h-7 text-xs font-semibold gap-1.5 px-2 ${
+                              candidateCount > 0
+                                ? "border-primary/40 bg-primary/5 text-primary hover:bg-primary/15"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
                           >
-                            <Eye className="h-4 w-4" />
+                            <Users className="h-3.5 w-3.5 text-primary" />
+                            <span>{candidateCount}</span>
+                            <ExternalLink className="h-3 w-3 opacity-60" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={() => handleOpenEdit(vacancy)}
-                            title="Tahrirlash"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => setDeletingVacancy(vacancy)}
-                            title="O'chirish"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatDate(vacancy.created_at)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => setPreviewVacancy(vacancy)}
+                              title="Batafsil ko'rish"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleOpenEdit(vacancy)}
+                              title="Tahrirlash"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => setDeletingVacancy(vacancy)}
+                              title="O'chirish"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* PAGINATION CONTROLS                                               */}
+        {/* ================================================================= */}
+        {!isLoadingVacancies && !isErrorVacancies && filteredVacancies.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+            {/* Results Counter */}
+            <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1 text-center sm:text-left">
+              Jami <span className="font-semibold text-foreground">{totalItems}</span> ta vakansiyadan{" "}
+              <span className="font-semibold text-foreground">
+                {startIndex}-{endIndex}
+              </span>{" "}
+              ko'rsatilmoqda
+            </p>
+
+            {/* Pagination Buttons (Oldingi / Sahifalar / Keyingi) */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1 sm:gap-1.5 order-1 sm:order-2 flex-wrap justify-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2 sm:px-3 text-xs gap-1"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={validCurrentPage <= 1}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <span>Oldingi</span>
+                </Button>
+
+                {getPageNumbers().map((page, idx) => {
+                  if (page === "ellipsis") {
+                    return (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="h-8 w-6 sm:w-8 flex items-center justify-center text-xs text-muted-foreground"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  const isCurrent = validCurrentPage === page;
+                  return (
+                    <Button
+                      type="button"
+                      key={page}
+                      variant={isCurrent ? "default" : "outline"}
+                      size="sm"
+                      className={`h-8 w-8 p-0 text-xs font-medium ${
+                        isCurrent ? "pointer-events-none shadow-xs" : ""
+                      }`}
+                      onClick={() => setCurrentPage(page as number)}
+                      aria-current={isCurrent ? "page" : undefined}
+                    >
+                      {page}
+                    </Button>
                   );
                 })}
-              </TableBody>
-            </Table>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2 sm:px-3 text-xs gap-1"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={validCurrentPage >= totalPages}
+                >
+                  <span>Keyingi</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
@@ -953,8 +1102,8 @@ export default function Vacancies() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  {editingVacancy ? <Edit className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                  {editingVacancy ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                 </div>
                 <div>
                   <DialogTitle className="text-xl">
@@ -983,8 +1132,8 @@ export default function Vacancies() {
                 )}
               </div>
 
-              {/* Grid 2 ustun: Joylashuv & Tajriba */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Grid 1 ustun (mobilda), 2 ustun (planshet/desktopda): Joylashuv & Tajriba */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Joylashuv (Location) */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -1001,6 +1150,19 @@ export default function Vacancies() {
                   {errors.location && (
                     <p className="text-xs font-medium text-destructive">{errors.location.message}</p>
                   )}
+                  {/* Quick Preset Chips */}
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {LOCATION_PRESETS.map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => setValue("location", loc, { shouldValidate: true })}
+                        className="text-[10px] px-2 py-0.5 rounded-md border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {loc}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Tajriba (Experience) */}
@@ -1038,7 +1200,7 @@ export default function Vacancies() {
                 control={control}
                 render={({ field }) => (
                   <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3 shadow-xs">
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 pr-2">
                       <Label htmlFor="form-is-active" className="text-sm font-semibold cursor-pointer">
                         Vakansiya holati
                       </Label>
@@ -1089,16 +1251,17 @@ export default function Vacancies() {
                 )}
               </div>
 
-              <DialogFooter className="pt-3 gap-2">
+              <DialogFooter className="pt-3 gap-2 flex-col-reverse sm:flex-row sm:justify-end">
                 <Button
                   type="button"
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => setIsDialogOpen(false)}
                   disabled={isSaving}
                 >
                   Bekor qilish
                 </Button>
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" className="w-full sm:w-auto" disabled={isSaving}>
                   {isSaving
                     ? "Saqlanmoqda..."
                     : editingVacancy
@@ -1115,9 +1278,9 @@ export default function Vacancies() {
         {/* ================================================================= */}
         {previewVacancy && (
           <Dialog open={true} onOpenChange={() => setPreviewVacancy(null)}>
-            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <div className="flex items-center justify-between pr-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
                   <div className="flex items-center gap-2">
                     {previewVacancy.is_active !== false && !previewVacancy.is_deleted ? (
                       <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-medium">
@@ -1134,6 +1297,7 @@ export default function Vacancies() {
                   </div>
 
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     className="h-7 text-xs gap-1.5"
@@ -1149,21 +1313,21 @@ export default function Vacancies() {
                   </Button>
                 </div>
 
-                <DialogTitle className="text-2xl font-bold pt-2">
+                <DialogTitle className="text-xl sm:text-2xl font-bold pt-2">
                   {previewVacancy.title}
                 </DialogTitle>
 
-                <DialogDescription className="flex flex-wrap items-center gap-4 text-xs pt-1">
+                <DialogDescription className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs pt-1">
                   <span className="flex items-center gap-1 text-foreground">
-                    <MapPin className="h-3.5 w-3.5 text-primary" />
-                    {previewVacancy.location || "Kokand University"}
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>{previewVacancy.location || "Kokand University"}</span>
                   </span>
                   <span className="flex items-center gap-1 text-foreground">
-                    <Briefcase className="h-3.5 w-3.5 text-primary" />
-                    {previewVacancy.experience || "Talab etilmaydi"}
+                    <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>{previewVacancy.experience || "Talab etilmaydi"}</span>
                   </span>
                   <span className="flex items-center gap-1 text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5" />
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
                     E'lon qilingan: {formatDate(previewVacancy.created_at)}
                   </span>
                 </DialogDescription>
@@ -1172,9 +1336,9 @@ export default function Vacancies() {
               <div className="space-y-4 pt-2">
                 {/* Requirements block */}
                 {previewVacancy.requirement && (
-                  <div className="rounded-lg border bg-muted/20 p-4 space-y-2">
+                  <div className="rounded-lg border bg-muted/20 p-3 sm:p-4 space-y-2">
                     <h4 className="text-sm font-semibold flex items-center gap-1.5 text-primary">
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-4 w-4 shrink-0" />
                       Nomzodga qo'yiladigan talablar:
                     </h4>
                     <p className="text-xs leading-relaxed text-foreground whitespace-pre-wrap">
@@ -1184,9 +1348,9 @@ export default function Vacancies() {
                 )}
 
                 {/* Description block */}
-                <div className="rounded-lg border p-4 space-y-2">
+                <div className="rounded-lg border p-3 sm:p-4 space-y-2">
                   <h4 className="text-sm font-semibold flex items-center gap-1.5 text-primary">
-                    <Building2 className="h-4 w-4" />
+                    <Building2 className="h-4 w-4 shrink-0" />
                     Lavozim tavsifi va universitet sharoitlari:
                   </h4>
                   <p className="text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
@@ -1195,20 +1359,23 @@ export default function Vacancies() {
                 </div>
               </div>
 
-              <DialogFooter className="pt-3 gap-2">
+              <DialogFooter className="pt-3 gap-2 flex-col-reverse sm:flex-row sm:justify-end">
                 <Button
+                  type="button"
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => setPreviewVacancy(null)}
                 >
                   Yopish
                 </Button>
                 <Button
+                  type="button"
+                  className="w-full sm:w-auto gap-1.5"
                   onClick={() => {
                     const target = previewVacancy;
                     setPreviewVacancy(null);
                     handleOpenEdit(target);
                   }}
-                  className="gap-1.5"
                 >
                   <Edit className="h-4 w-4" />
                   Tahrirlash
@@ -1228,7 +1395,7 @@ export default function Vacancies() {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className="h-5 w-5 shrink-0" />
                 Vakansiyani o'chirishni tasdiqlaysizmi?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-sm pt-2">
@@ -1241,13 +1408,13 @@ export default function Vacancies() {
                 </span>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="mt-3 gap-2">
-              <AlertDialogCancel disabled={deleteMutation.isPending}>
+            <AlertDialogFooter className="mt-3 gap-2 flex-col-reverse sm:flex-row sm:justify-end">
+              <AlertDialogCancel disabled={deleteMutation.isPending} className="w-full sm:w-auto">
                 Bekor qilish
               </AlertDialogCancel>
               <AlertDialogAction
                 disabled={deleteMutation.isPending}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => {
                   if (deletingVacancy?.id) {
                     deleteMutation.mutate(deletingVacancy.id);

@@ -27,7 +27,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
-  Sparkles,
   Inbox,
   Search,
   CalendarCheck,
@@ -374,41 +373,37 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8 min-w-0">
         {/* Top Hero Banner */}
-        <div className="relative overflow-hidden rounded-2xl border border-border/80 glass-card p-6 sm:p-8">
+        <div className="relative overflow-hidden rounded-2xl border border-border/80 glass-card p-4 sm:p-6 md:p-8">
           <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Kokand University ATS & Career Portal</span>
-              </div>
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+            <div className="space-y-2 max-w-2xl min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 Karyera va Nomzodlar Boshqaruvi
               </h1>
-              <p className="text-sm text-muted-foreground max-w-xl">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Universitet bo'sh ish o'rinlari, nomzodlar saralashi va ishga qabul qilish (ATS)
                 tizimining real vaqt statistikasi hamda tahliliy ko'rsatkichlari.
               </p>
             </div>
 
             {/* Quick Actions Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto shrink-0">
+              <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm justify-center w-full sm:w-auto">
                 <Link to="/vacancies">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Yangi Vakansiya
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="border-border/80 hover:bg-accent">
+              <Button asChild variant="outline" className="border-border/80 hover:bg-accent justify-center w-full sm:w-auto">
                 <Link to="/subscriptions">
                   <Users className="mr-2 h-4 w-4 text-primary" />
                   Nomzodlar Bazasi
                 </Link>
               </Button>
               {isSuperAdmin && (
-                <Button asChild variant="secondary" className="border">
+                <Button asChild variant="secondary" className="border justify-center w-full sm:w-auto">
                   <Link to="/admins">
                     <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
                     Adminlar
@@ -420,25 +415,25 @@ export default function Dashboard() {
         </div>
 
         {/* 4 ATS Dynamic Statistics Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => (
             <Card
               key={stat.title}
-              className="glass-card hover:border-primary/40 transition-all duration-200"
+              className="glass-card hover:border-primary/40 transition-all duration-200 min-w-0 overflow-hidden"
             >
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 gap-2">
+                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-xl ${stat.bg} ${stat.color}`}>
+                <div className={`p-2 rounded-xl shrink-0 ${stat.bg} ${stat.color}`}>
                   <stat.icon className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent className="space-y-1">
-                <div className="text-3xl font-extrabold text-foreground">
+                <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                   {isLoading ? "..." : stat.value}
                 </div>
-                <div className="flex items-center gap-1.5 text-xs">
+                <div className="flex flex-wrap items-center gap-1.5 text-xs">
                   {stat.isPositive ? (
                     <ArrowUpRight className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                   ) : (
@@ -457,7 +452,7 @@ export default function Dashboard() {
                     <span className="text-muted-foreground">{stat.subText}</span>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground pt-1">
+                <p className="text-[11px] text-muted-foreground pt-1 truncate">
                   {stat.description}
                 </p>
               </CardContent>
@@ -466,22 +461,22 @@ export default function Dashboard() {
         </div>
 
         {/* Qabul Qilish Voronkasi (Recruitment Pipeline) */}
-        <Card className="glass-card overflow-hidden">
-          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 gap-2 border-b border-border/60">
-            <div>
+        <Card className="glass-card overflow-hidden min-w-0 w-full">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 gap-3 border-b border-border/60">
+            <div className="min-w-0">
               <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
-                <Filter className="h-4 w-4 text-primary" />
-                Qabul Qilish Voronkasi (Recruitment Pipeline)
+                <Filter className="h-4 w-4 text-primary shrink-0" />
+                <span className="truncate">Qabul Qilish Voronkasi (Recruitment Pipeline)</span>
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
+              <CardDescription className="text-xs text-muted-foreground mt-0.5 truncate">
                 Nomzodlar arizalarining saralash va qabul bosqichlari bo'yicha taqsimoti
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               <Badge variant="outline" className="border-primary/30 text-primary text-xs font-semibold px-2.5 py-1">
                 Saralash konversiyasi: {pipelineStats.conversionRate}%
               </Badge>
-              <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1">
+              <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1 h-8">
                 <Link to="/subscriptions">
                   Voronkani ko'rish
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -490,24 +485,24 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {/* Step 1: Yangi */}
-              <div className="relative group p-4 rounded-xl border border-blue-500/20 bg-blue-500/[0.03] hover:bg-blue-500/[0.06] transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <div className="relative group p-3.5 sm:p-4 rounded-xl border border-blue-500/20 bg-blue-500/[0.03] hover:bg-blue-500/[0.06] transition-all min-w-0">
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
                       <Inbox className="h-4 w-4" />
                     </div>
-                    <span className="text-xs font-bold text-foreground">1. Yangi</span>
+                    <span className="text-xs font-bold text-foreground truncate">1. Yangi</span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                  <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shrink-0">
                     {pipelineStats.newPct}%
                   </Badge>
                 </div>
-                <div className="text-2xl font-bold text-foreground mb-1">
+                <div className="text-xl sm:text-2xl font-bold text-foreground mb-1">
                   {pipelineStats.newSubs} <span className="text-xs font-normal text-muted-foreground">nomzod</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground mb-3">
+                <p className="text-[11px] text-muted-foreground mb-3 truncate">
                   Yangi kelib tushgan arizalar
                 </p>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -519,22 +514,22 @@ export default function Dashboard() {
               </div>
 
               {/* Step 2: Ko'rib chiqilmoqda */}
-              <div className="relative group p-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06] transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <div className="relative group p-3.5 sm:p-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06] transition-all min-w-0">
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
                       <Search className="h-4 w-4" />
                     </div>
-                    <span className="text-xs font-bold text-foreground">2. Ko'rib chiqilmoqda</span>
+                    <span className="text-xs font-bold text-foreground truncate">2. Ko'rib chiqilmoqda</span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">
+                  <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 shrink-0">
                     {pipelineStats.reviewPct}%
                   </Badge>
                 </div>
-                <div className="text-2xl font-bold text-foreground mb-1">
+                <div className="text-xl sm:text-2xl font-bold text-foreground mb-1">
                   {pipelineStats.reviewSubs} <span className="text-xs font-normal text-muted-foreground">nomzod</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground mb-3">
+                <p className="text-[11px] text-muted-foreground mb-3 truncate">
                   Rezyume va hujjatlar ekspertizasi
                 </p>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -546,22 +541,22 @@ export default function Dashboard() {
               </div>
 
               {/* Step 3: Suhbat */}
-              <div className="relative group p-4 rounded-xl border border-purple-500/20 bg-purple-500/[0.03] hover:bg-purple-500/[0.06] transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+              <div className="relative group p-3.5 sm:p-4 rounded-xl border border-purple-500/20 bg-purple-500/[0.03] hover:bg-purple-500/[0.06] transition-all min-w-0">
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
                       <CalendarCheck className="h-4 w-4" />
                     </div>
-                    <span className="text-xs font-bold text-foreground">3. Suhbat</span>
+                    <span className="text-xs font-bold text-foreground truncate">3. Suhbat</span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20">
+                  <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 shrink-0">
                     {pipelineStats.interviewPct}%
                   </Badge>
                 </div>
-                <div className="text-2xl font-bold text-foreground mb-1">
+                <div className="text-xl sm:text-2xl font-bold text-foreground mb-1">
                   {pipelineStats.interviewSubs} <span className="text-xs font-normal text-muted-foreground">nomzod</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground mb-3">
+                <p className="text-[11px] text-muted-foreground mb-3 truncate">
                   Kafedra va HR suhbatlari
                 </p>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -573,22 +568,22 @@ export default function Dashboard() {
               </div>
 
               {/* Step 4: Qabul qilindi */}
-              <div className="relative group p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06] transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <div className="relative group p-3.5 sm:p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] hover:bg-emerald-500/[0.06] transition-all min-w-0">
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                       <Award className="h-4 w-4" />
                     </div>
-                    <span className="text-xs font-bold text-foreground">4. Qabul qilindi</span>
+                    <span className="text-xs font-bold text-foreground truncate">4. Qabul qilindi</span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                  <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0">
                     {pipelineStats.hiredPct}%
                   </Badge>
                 </div>
-                <div className="text-2xl font-bold text-foreground mb-1">
+                <div className="text-xl sm:text-2xl font-bold text-foreground mb-1">
                   {pipelineStats.hiredSubs} <span className="text-xs font-normal text-muted-foreground">nomzod</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground mb-3">
+                <p className="text-[11px] text-muted-foreground mb-3 truncate">
                   Taklif berilgan va ishga qabul
                 </p>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -603,24 +598,24 @@ export default function Dashboard() {
         </Card>
 
         {/* Charts Section */}
-        <div className="grid gap-6 lg:grid-cols-7">
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-7 min-w-0 w-full">
           {/* Main Area Chart: Monthly Application Dynamics (4 cols) */}
-          <Card className="lg:col-span-4 glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div>
-                <CardTitle className="text-base font-bold text-foreground">
+          <Card className="lg:col-span-4 glass-card min-w-0 w-full overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between pb-4 gap-2">
+              <div className="min-w-0">
+                <CardTitle className="text-base font-bold text-foreground truncate">
                   Arizalar Dinamikasi
                 </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
+                <CardDescription className="text-xs text-muted-foreground truncate">
                   Oylar bo'yicha nomzodlar murojaatlari va ariza topshirish dinamikasi
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="border-primary/30 text-primary text-xs font-medium">
+              <Badge variant="outline" className="border-primary/30 text-primary text-xs font-medium shrink-0">
                 Oylik statistika
               </Badge>
             </CardHeader>
-            <CardContent>
-              <div className="h-72 w-full">
+            <CardContent className="min-w-0 w-full">
+              <div className="h-72 w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={monthlyChartData}
@@ -672,13 +667,14 @@ export default function Dashboard() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-              <div className="pt-4 mt-2 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+              <div className="pt-4 mt-2 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-primary" />
-                  Bu oylik arizalar: <strong className="text-foreground">{dynamicStats.thisMonthSubs} ta</strong>
+                  <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span>Bu oylik arizalar:</span>
+                  <strong className="text-foreground">{dynamicStats.thisMonthSubs} ta</strong>
                 </span>
-                <span>
-                  O'tgan oyga nisbatan:{" "}
+                <span className="flex items-center gap-1.5">
+                  <span>O'tgan oyga nisbatan:</span>
                   <strong
                     className={
                       dynamicStats.monthTrendIsPositive
@@ -694,19 +690,19 @@ export default function Dashboard() {
           </Card>
 
           {/* Vacancy Breakdown & Top Majors (3 cols) */}
-          <Card className="lg:col-span-3 glass-card flex flex-col justify-between">
+          <Card className="lg:col-span-3 glass-card flex flex-col justify-between min-w-0 w-full overflow-hidden">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold text-foreground">
+              <CardTitle className="text-base font-bold text-foreground truncate">
                 Vakansiyalar & Yo'nalishlar
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
+              <CardDescription className="text-xs text-muted-foreground truncate">
                 Vakansiyalar holati va eng ko'p murojaat qilingan sohalar
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-5 min-w-0 w-full">
               {/* Donut Chart / Status Progress */}
-              <div className="flex items-center justify-around gap-4 py-1">
-                <div className="h-28 w-28 shrink-0">
+              <div className="flex flex-col sm:flex-row items-center justify-around gap-4 py-1 min-w-0">
+                <div className="h-28 w-28 shrink-0 min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -725,34 +721,34 @@ export default function Dashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="space-y-2 text-xs flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <span className="h-2.5 w-2.5 rounded-xs bg-primary" />
-                      Faol vakansiyalar
+                <div className="space-y-2 text-xs w-full sm:flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-1.5 text-muted-foreground min-w-0 truncate">
+                      <span className="h-2.5 w-2.5 rounded-xs bg-primary shrink-0" />
+                      <span className="truncate">Faol vakansiyalar</span>
                     </span>
-                    <span className="font-bold text-foreground">
+                    <span className="font-bold text-foreground shrink-0">
                       {dynamicStats.activeVacancies} ta ({dynamicStats.activeRate}%)
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <span className="h-2.5 w-2.5 rounded-xs bg-slate-500" />
-                      Arxivda / Yopilgan
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-1.5 text-muted-foreground min-w-0 truncate">
+                      <span className="h-2.5 w-2.5 rounded-xs bg-slate-500 shrink-0" />
+                      <span className="truncate">Arxivda / Yopilgan</span>
                     </span>
-                    <span className="font-bold text-foreground">
+                    <span className="font-bold text-foreground shrink-0">
                       {dynamicStats.archivedVacancies} ta
                     </span>
                   </div>
-                  <div className="pt-1 border-t border-border/60 flex items-center justify-between font-semibold">
+                  <div className="pt-1 border-t border-border/60 flex items-center justify-between font-semibold gap-2">
                     <span>Jami vakansiyalar</span>
-                    <span className="text-primary">{dynamicStats.totalVacancies} ta</span>
+                    <span className="text-primary shrink-0">{dynamicStats.totalVacancies} ta</span>
                   </div>
                 </div>
               </div>
 
               {/* Top Majors Breakdown List */}
-              <div className="space-y-2.5 pt-2 border-t border-border/60">
+              <div className="space-y-2.5 pt-2 border-t border-border/60 min-w-0">
                 <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
                   Top Murojaat Qilingan Yo'nalishlar
                 </p>
@@ -763,12 +759,12 @@ export default function Dashboard() {
                         ? Math.round((item.count / dynamicStats.totalSubs) * 100)
                         : 0;
                     return (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground truncate max-w-[180px]">
+                      <div key={idx} className="space-y-1 min-w-0">
+                        <div className="flex items-center justify-between text-xs gap-2">
+                          <span className="text-muted-foreground truncate min-w-0 flex-1">
                             {item.name}
                           </span>
-                          <span className="font-semibold text-foreground">
+                          <span className="font-semibold text-foreground shrink-0">
                             {item.count} ta ({pct}%)
                           </span>
                         </div>
@@ -792,21 +788,21 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Activity Section */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 min-w-0 w-full">
           {/* Recent Applications Card (Clickable to /subscriptions) */}
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="text-base font-bold text-foreground">
+          <Card className="glass-card min-w-0 w-full overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between pb-3 gap-2">
+              <div className="min-w-0">
+                <CardTitle className="text-base font-bold text-foreground truncate">
                   So'nggi kelib tushgan arizalar
                 </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
+                <CardDescription className="text-xs text-muted-foreground truncate">
                   Yangi nomzodlar va ularning ATS saralash holati
                 </CardDescription>
               </div>
-              <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1">
+              <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1 h-8 shrink-0">
                 <Link to="/subscriptions">
-                  Barcha nomzodlar
+                  Barchasi
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -829,16 +825,16 @@ export default function Dashboard() {
                     <Link
                       key={sub.id || sub.email}
                       to="/subscriptions"
-                      className="group flex items-center justify-between p-3 rounded-xl bg-card/40 border border-border/60 hover:border-primary/50 hover:bg-card/70 transition-all duration-200"
+                      className="group flex items-center justify-between p-3 rounded-xl bg-card/40 border border-border/60 hover:border-primary/50 hover:bg-card/70 transition-all duration-200 min-w-0 gap-3"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <Avatar className="h-9 w-9 border border-primary/20 shrink-0 group-hover:scale-105 transition-transform">
                           <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
                             <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                               {sub.fullName}
                             </p>
@@ -852,7 +848,7 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end shrink-0 pl-2 gap-1">
+                      <div className="flex flex-col items-end shrink-0 pl-1 gap-1">
                         <Badge
                           variant="outline"
                           className={`text-[10px] h-5 px-1.5 font-medium border ${stageInfo.badgeClass}`}
@@ -886,19 +882,19 @@ export default function Dashboard() {
           </Card>
 
           {/* Recent Vacancies Card */}
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="text-base font-bold text-foreground">
+          <Card className="glass-card min-w-0 w-full overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between pb-3 gap-2">
+              <div className="min-w-0">
+                <CardTitle className="text-base font-bold text-foreground truncate">
                   So'nggi vakansiyalar
                 </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
+                <CardDescription className="text-xs text-muted-foreground truncate">
                   Universitetdagi ochiq ish o'rinlari va talablar
                 </CardDescription>
               </div>
-              <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1">
+              <Button asChild variant="ghost" size="sm" className="text-xs text-primary gap-1 h-8 shrink-0">
                 <Link to="/vacancies">
-                  Barcha vakansiyalar
+                  Barchasi
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -908,20 +904,20 @@ export default function Dashboard() {
                 {safeVacancies.slice(0, 5).map((vacancy) => (
                   <div
                     key={vacancy.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-card/40 border border-border/60 hover:border-primary/40 transition-all duration-200"
+                    className="flex items-center justify-between p-3 rounded-xl bg-card/40 border border-border/60 hover:border-primary/40 transition-all duration-200 min-w-0 gap-3"
                   >
-                    <div className="min-w-0 pr-3">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1 pr-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <p className="text-sm font-semibold text-foreground truncate">
                           {vacancy.title}
                         </p>
                         {vacancy.is_active !== false && !vacancy.is_deleted ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-500 font-medium">
+                          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-500 font-medium shrink-0">
                             <CheckCircle2 className="h-3 w-3" />
                             Faol
                           </span>
                         ) : (
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground shrink-0">
                             Arxiv
                           </span>
                         )}

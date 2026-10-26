@@ -79,7 +79,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
     >
       {/* Top Branding Section */}
       <div>
-        <div className="flex h-16 items-center gap-3 border-b border-border/80 px-5">
+        <div className="flex h-16 items-center gap-3 border-b border-border/80 px-5 pr-12 lg:pr-5">
           <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 overflow-hidden">
             <img
               src="/ku-white.png"

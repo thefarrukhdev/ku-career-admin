@@ -13,7 +13,7 @@ import { Sidebar } from "./Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,42 +84,43 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content Area */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
         {/* Top Sticky Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/80 glass-header px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/80 glass-header px-3 sm:px-6">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Mobile Sidebar Trigger Sheet */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="lg:hidden h-9 w-9 rounded-lg"
+                  className="lg:hidden h-9 w-9 shrink-0 rounded-lg"
                   aria-label="Menyuni ochish"
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-72 border-r border-border/80">
+                <SheetTitle className="sr-only">Navigatsiya menyusi</SheetTitle>
                 <Sidebar onNavigate={() => setMobileOpen(false)} className="h-full border-r-0" />
               </SheetContent>
             </Sheet>
 
             {/* Breadcrumb / Page Title */}
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-sm min-w-0">
               <Link
                 to="/"
-                className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-flex items-center gap-1 font-medium text-xs"
+                className="text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-flex items-center gap-1 font-medium text-xs shrink-0"
               >
                 ATS Portal
               </Link>
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60 hidden sm:inline-block" />
-              <span className="font-semibold text-foreground text-sm truncate">
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60 hidden sm:inline-block shrink-0" />
+              <span className="font-semibold text-foreground text-xs sm:text-sm truncate">
                 {currentInfo.title}
               </span>
             </div>
           </div>
 
           {/* Right Header Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Theme Toggle */}
             <ThemeToggle />
 
@@ -208,7 +209,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Main Body */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0">
           {children}
         </main>
 

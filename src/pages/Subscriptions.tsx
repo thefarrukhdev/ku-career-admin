@@ -71,11 +71,6 @@ import {
   Calendar,
   Briefcase,
   Users,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Sparkles,
-  MessageSquare,
   RotateCcw,
   ExternalLink,
   ChevronDown,
@@ -86,13 +81,14 @@ import {
   X,
   User,
   GraduationCap,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 // Status configuration for ATS Pipeline
 interface StatusMeta {
   label: string;
   badgeClass: string;
-  icon: typeof Sparkles;
 }
 
 const STATUS_CONFIG: Record<CandidateStatus, StatusMeta> = {
@@ -100,31 +96,26 @@ const STATUS_CONFIG: Record<CandidateStatus, StatusMeta> = {
     label: "Yangi",
     badgeClass:
       "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
-    icon: Sparkles,
   },
   reviewing: {
     label: "Ko'rib chiqilmoqda",
     badgeClass:
       "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
-    icon: Clock,
   },
   interview: {
     label: "Suhbatda",
     badgeClass:
       "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800",
-    icon: MessageSquare,
   },
   accepted: {
     label: "Qabul qilindi",
     badgeClass:
       "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800",
-    icon: CheckCircle2,
   },
   rejected: {
     label: "Rad etildi",
     badgeClass:
       "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800",
-    icon: XCircle,
   },
 };
 
@@ -162,6 +153,35 @@ function formatDateTime(dateStr?: string): string {
   }
 }
 
+// Generate pagination range with ellipses
+function getPaginationRange(currentPage: number, totalPages: number): (number | string)[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  const delta = 1;
+  const range: number[] = [];
+  for (
+    let i = Math.max(2, currentPage - delta);
+    i <= Math.min(totalPages - 1, currentPage + delta);
+    i++
+  ) {
+    range.push(i);
+  }
+
+  if (currentPage - delta > 2) {
+    range.unshift(-1); // left ellipsis
+  }
+  range.unshift(1);
+
+  if (currentPage + delta < totalPages - 1) {
+    range.push(-2); // right ellipsis
+  }
+  range.push(totalPages);
+
+  return range;
+}
+
 export default function Subscriptions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -173,12 +193,21 @@ export default function Subscriptions() {
   const [selectedVacancy, setSelectedVacancy] = useState(vacancyIdParam || "all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   // Sync selected vacancy when query parameter changes
   useEffect(() => {
     if (vacancyIdParam) {
       setSelectedVacancy(vacancyIdParam);
     }
   }, [vacancyIdParam]);
+
+  // Reset to page 1 whenever any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedVacancy, selectedStatus, pageSize]);
 
   // Dialogs state
   const [previewResumeSub, setPreviewResumeSub] = useState<Subscription | null>(null);
@@ -251,10 +280,8 @@ export default function Subscriptions() {
     newStatus: CandidateStatus,
     candidateName: string
   ) => {
-    // Persist in localStorage via service
     subscriptionService.setCandidateStatus(candidateId, newStatus);
 
-    // Optimistically update React Query cache
     queryClient.setQueryData<Subscription[]>(["subscriptions"], (old) => {
       if (!old) return [];
       return old.map((sub) =>
@@ -262,7 +289,6 @@ export default function Subscriptions() {
       );
     });
 
-    // Update active profile modal if open
     setProfileSub((prev) =>
       prev && prev.id === candidateId ? { ...prev, status: newStatus } : prev
     );
@@ -361,6 +387,25 @@ export default function Subscriptions() {
     });
   }, [subscriptions, searchQuery, selectedVacancy, selectedStatus]);
 
+  // Pagination calculations
+  const totalItems = filteredSubscriptions.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  // Auto-correct page if current page exceeds total pages
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedSubscriptions = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredSubscriptions.slice(startIndex, startIndex + pageSize);
+  }, [filteredSubscriptions, currentPage, pageSize]);
+
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalItems);
+
   // Reset all filters
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -449,37 +494,37 @@ export default function Subscriptions() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header Title & Quick Export */}
+        {/* Header Title & Quick Export (Clean, Solid, No Pill Badges) */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Users className="w-7 h-7 text-primary" />
-              Nomzodlar va Arizalar (ATS)
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+              <Users className="w-6 h-6 sm:w-7 sm:h-7 text-primary shrink-0" />
+              <span>Arizalar va Nomzodlar</span>
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Universitet vakansiyalariga kelib tushgan barcha rezyumelar, nomzodlar quvuri (Pipeline) va eslatmalar boshqaruvi
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Universitet vakansiyalariga kelib tushgan barcha rezyumelar, nomzodlar quvuri va eslatmalar boshqaruvi
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={handleExportCSV}
               disabled={isLoading || !filteredSubscriptions.length}
-              className="gap-2 shadow-sm border-primary/20 hover:border-primary text-foreground"
+              className="gap-2 shadow-xs border-primary/20 hover:border-primary text-foreground w-full sm:w-auto min-h-[40px]"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Excel / CSV Eksport</span>
             </Button>
           </div>
         </div>
 
-        {/* Status Filter Tabs (Clean, Modern, No Clutter) */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-muted/40 border border-border/60">
+        {/* Status Filter Tabs (Clean, Horizontal Scrollable on Mobile) */}
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/40 border border-border/60 overflow-x-auto no-scrollbar scroll-smooth">
           <button
             type="button"
             onClick={() => setSelectedStatus("all")}
             className={cn(
-              "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2",
+              "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 min-h-[36px]",
               selectedStatus === "all"
                 ? "bg-background text-foreground shadow-xs font-semibold"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
@@ -502,7 +547,7 @@ export default function Subscriptions() {
                 type="button"
                 onClick={() => setSelectedStatus(key)}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 min-h-[36px]",
                   isSelected
                     ? "bg-background text-foreground shadow-xs font-semibold"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
@@ -518,9 +563,9 @@ export default function Subscriptions() {
         </div>
 
         {/* Filter and Search Bar */}
-        <Card className="shadow-sm">
-          <CardContent className="p-4 space-y-4">
-            <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+        <Card className="shadow-xs">
+          <CardContent className="p-3 sm:p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
               {/* Search input */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -529,12 +574,12 @@ export default function Subscriptions() {
                   placeholder="Ism, telefon, mutaxassislik, email yoki izoh bo'yicha qidirish..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-9 w-full"
+                  className="pl-9 pr-9 w-full min-h-[40px] text-sm"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                     title="Qidiruvni tozalash"
                   >
                     <X className="w-4 h-4" />
@@ -543,9 +588,9 @@ export default function Subscriptions() {
               </div>
 
               {/* Vacancy Filter Select */}
-              <div className="w-full lg:w-72">
+              <div className="w-full sm:w-72">
                 <Select value={selectedVacancy} onValueChange={setSelectedVacancy}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full min-h-[40px] text-sm">
                     <Briefcase className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
                     <SelectValue placeholder="Barcha vakansiyalar" />
                   </SelectTrigger>
@@ -560,14 +605,12 @@ export default function Subscriptions() {
                 </Select>
               </div>
 
-
-
               {/* Reset Filters button */}
               {hasActiveFilters && (
                 <Button
                   variant="ghost"
                   onClick={handleResetFilters}
-                  className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0"
+                  className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0 min-h-[40px]"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>Filtrlarni tozalash</span>
@@ -578,8 +621,8 @@ export default function Subscriptions() {
         </Card>
 
         {/* Subscriptions Table Card */}
-        <Card className="shadow-sm overflow-hidden">
-          <CardHeader className="py-4 px-6 border-b bg-muted/20 flex flex-row items-center justify-between">
+        <Card className="shadow-xs overflow-hidden">
+          <CardHeader className="py-3 sm:py-4 px-4 sm:px-6 border-b bg-muted/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <span>Nomzodlar ro'yxati</span>
               <Badge variant="secondary" className="font-semibold text-xs">
@@ -594,7 +637,7 @@ export default function Subscriptions() {
           </CardHeader>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="p-6 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -617,7 +660,7 @@ export default function Subscriptions() {
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   Server bilan bog'lanishda muammo yuz berdi. Iltimos, internet aloqasini tekshiring yoki qayta urinib ko'ring.
                 </p>
-                <Button variant="outline" onClick={() => refetchSubscriptions()} className="gap-2">
+                <Button variant="outline" onClick={() => refetchSubscriptions()} className="gap-2 min-h-[40px]">
                   <RotateCcw className="w-4 h-4" /> Qayta yuklash
                 </Button>
               </div>
@@ -635,27 +678,27 @@ export default function Subscriptions() {
                   </p>
                 </div>
                 {hasActiveFilters && (
-                  <Button variant="outline" size="sm" onClick={handleResetFilters} className="gap-2">
+                  <Button variant="outline" size="sm" onClick={handleResetFilters} className="gap-2 min-h-[38px]">
                     <RotateCcw className="w-3.5 h-3.5" /> Filtrlarni bekor qilish
                   </Button>
                 )}
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[760px]">
                   <TableHeader>
                     <TableRow className="bg-muted/10 hover:bg-muted/10">
                       <TableHead className="w-[260px]">Nomzod</TableHead>
-                      <TableHead className="w-[200px]">Aloqa</TableHead>
-                      <TableHead className="w-[220px]">Vakansiya & Mutaxassislik</TableHead>
-                      <TableHead className="w-[130px]">Rezyume (CV)</TableHead>
+                      <TableHead className="w-[190px]">Aloqa</TableHead>
+                      <TableHead className="w-[210px]">Vakansiya & Mutaxassislik</TableHead>
+                      <TableHead className="w-[120px]">Rezyume (CV)</TableHead>
                       <TableHead className="w-[180px]">Status (Pipeline)</TableHead>
                       <TableHead className="w-[150px]">Yuborilgan sana</TableHead>
-                      <TableHead className="w-[100px] text-right">Amallar</TableHead>
+                      <TableHead className="w-[90px] text-right">Amallar</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredSubscriptions.map((sub) => {
+                    {paginatedSubscriptions.map((sub) => {
                       const vacancy = sub.vacansy_id
                         ? vacanciesMap.get(String(sub.vacansy_id))
                         : undefined;
@@ -780,7 +823,7 @@ export default function Subscriptions() {
                                 <button
                                   type="button"
                                   className={cn(
-                                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-all shadow-xs",
+                                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-all shadow-xs cursor-pointer",
                                     statusMeta.badgeClass
                                   )}
                                 >
@@ -855,6 +898,98 @@ export default function Subscriptions() {
                 </Table>
               </div>
             )}
+
+            {/* Pagination Controls */}
+            {!isLoading && filteredSubscriptions.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-muted/10 text-sm">
+                {/* Information and Page Size Selector */}
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs sm:text-sm text-muted-foreground w-full sm:w-auto">
+                  <span>
+                    Jami <span className="font-semibold text-foreground">{totalItems}</span> ta arizadan{" "}
+                    <span className="font-semibold text-foreground">
+                      {startItem}-{endItem}
+                    </span>{" "}
+                    ko'rsatilmoqda
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs">Sahifada:</span>
+                    <Select
+                      value={String(pageSize)}
+                      onValueChange={(val) => setPageSize(Number(val))}
+                    >
+                      <SelectTrigger className="h-8 w-16 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent side="top">
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="15">15</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Page Navigation Buttons */}
+                <div className="flex items-center gap-1 flex-wrap justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="h-8 px-2 sm:px-3 text-xs gap-1 min-w-[36px]"
+                    title="Oldingi sahifa"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Oldingi</span>
+                  </Button>
+
+                  <div className="flex items-center gap-1">
+                    {getPaginationRange(currentPage, totalPages).map((p, idx) => {
+                      if (typeof p === "string" || p < 0) {
+                        return (
+                          <span
+                            key={`ellipsis-${idx}`}
+                            className="w-8 h-8 flex items-center justify-center text-xs text-muted-foreground select-none"
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+
+                      const isCurrent = p === currentPage;
+                      return (
+                        <Button
+                          key={p}
+                          variant={isCurrent ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(p)}
+                          className={cn(
+                            "h-8 w-8 p-0 text-xs font-medium",
+                            isCurrent && "pointer-events-none font-bold"
+                          )}
+                        >
+                          {p}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="h-8 px-2 sm:px-3 text-xs gap-1 min-w-[36px]"
+                    title="Keyingi sahifa"
+                  >
+                    <span className="hidden sm:inline">Keyingi</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -864,25 +999,25 @@ export default function Subscriptions() {
       {/* ============================================================ */}
       {previewResumeSub && (
         <Dialog open={true} onOpenChange={() => setPreviewResumeSub(null)}>
-          <DialogContent className="max-w-4xl max-h-[92vh] flex flex-col p-6">
-            <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b">
-              <div>
-                <DialogTitle className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  {previewResumeSub.fullName} — Rezyume (CV)
+          <DialogContent className="w-[95vw] sm:max-w-4xl max-h-[92vh] flex flex-col p-4 sm:p-6 overflow-hidden">
+            <DialogHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-3 border-b gap-3">
+              <div className="min-w-0 pr-6 sm:pr-0">
+                <DialogTitle className="text-base sm:text-lg font-semibold flex items-center gap-2 truncate">
+                  <FileText className="w-5 h-5 text-primary shrink-0" />
+                  <span className="truncate">{previewResumeSub.fullName} — Rezyume</span>
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5 truncate">
                   {previewResumeSub.major} • {previewResumeSub.phone}
                 </DialogDescription>
               </div>
 
               {previewResumeSub.resume_file && (
-                <div className="flex items-center gap-2 mr-6">
+                <div className="flex items-center gap-2 shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
                     asChild
-                    className="gap-1.5 text-xs h-8"
+                    className="gap-1.5 text-xs h-8 sm:h-9"
                   >
                     <a
                       href={previewResumeSub.resume_file}
@@ -890,7 +1025,7 @@ export default function Subscriptions() {
                       rel="noopener noreferrer"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      Yangi oynada ochish
+                      <span className="hidden sm:inline">Yangi oynada</span> ochish
                     </a>
                   </Button>
 
@@ -898,7 +1033,7 @@ export default function Subscriptions() {
                     variant="default"
                     size="sm"
                     asChild
-                    className="gap-1.5 text-xs h-8"
+                    className="gap-1.5 text-xs h-8 sm:h-9"
                   >
                     <a
                       href={previewResumeSub.resume_file}
@@ -914,12 +1049,12 @@ export default function Subscriptions() {
               )}
             </DialogHeader>
 
-            <div className="flex-1 min-h-[500px] mt-4 relative bg-muted/20 rounded-lg overflow-hidden border">
+            <div className="flex-1 min-h-[350px] sm:min-h-[500px] mt-3 sm:mt-4 relative bg-muted/20 rounded-lg overflow-hidden border">
               {previewResumeSub.resume_file ? (
                 <iframe
                   src={previewResumeSub.resume_file}
                   title={`${previewResumeSub.fullName} CV`}
-                  className="w-full h-full min-h-[500px] border-0"
+                  className="w-full h-full min-h-[350px] sm:min-h-[500px] border-0"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-2">
@@ -938,20 +1073,20 @@ export default function Subscriptions() {
       {/* ============================================================ */}
       {profileSub && (
         <Dialog open={true} onOpenChange={() => setProfileSub(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
+          <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-5">
             <DialogHeader className="pb-4 border-b">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
+                  <Avatar className="h-11 w-11 sm:h-12 sm:w-12 border-2 border-primary/20 shrink-0">
                     <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
                       {getInitials(profileSub.fullName)}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <DialogTitle className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <DialogTitle className="text-lg sm:text-xl font-bold text-foreground truncate">
                       {profileSub.fullName}
                     </DialogTitle>
-                    <DialogDescription className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                    <DialogDescription className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                       <span>Ariza ID: {profileSub.id || "-"}</span>
                       <span>•</span>
                       <span>{formatDateTime(profileSub.created_at)}</span>
@@ -960,7 +1095,7 @@ export default function Subscriptions() {
                 </div>
 
                 {/* Status Switcher in Profile Header */}
-                <div className="shrink-0">
+                <div className="w-full sm:w-auto shrink-0">
                   <Select
                     value={profileSub.status || "new"}
                     onValueChange={(val) => {
@@ -973,7 +1108,7 @@ export default function Subscriptions() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 text-xs font-medium w-44">
+                    <SelectTrigger className="h-9 text-xs font-medium w-full sm:w-44 min-h-[38px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -989,7 +1124,7 @@ export default function Subscriptions() {
             </DialogHeader>
 
             {/* Candidate Details Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="p-3.5 rounded-lg border bg-muted/20 space-y-1">
                 <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
                   <Phone className="w-3.5 h-3.5 text-primary" /> Telefon raqami
@@ -1067,7 +1202,7 @@ export default function Subscriptions() {
                       variant="outline"
                       size="sm"
                       onClick={() => setPreviewResumeSub(profileSub)}
-                      className="h-7 text-xs gap-1.5 mt-0.5"
+                      className="h-8 text-xs gap-1.5 mt-0.5"
                     >
                       <Eye className="w-3.5 h-3.5 text-primary" /> Rezyumeni ko'rish
                     </Button>
@@ -1107,7 +1242,7 @@ export default function Subscriptions() {
                   onClick={handleSaveNote}
                   disabled={isSavingNote}
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 min-h-[38px]"
                 >
                   <Check className="w-4 h-4" />
                   {isSavingNote ? "Saqlanmoqda..." : "Eslatmani saqlash"}
@@ -1123,7 +1258,7 @@ export default function Subscriptions() {
       {/* ============================================================ */}
       {deleteTarget && (
         <AlertDialog open={true} onOpenChange={() => setDeleteTarget(null)}>
-          <AlertDialogContent className="max-w-md">
+          <AlertDialogContent className="w-[95vw] sm:max-w-md p-4 sm:p-6">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-lg font-semibold text-destructive flex items-center gap-2">
                 <Trash2 className="w-5 h-5" />
@@ -1139,17 +1274,18 @@ export default function Subscriptions() {
                 </span>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="mt-4 gap-2">
+            <AlertDialogFooter className="mt-4 gap-2 flex-col sm:flex-row">
               <AlertDialogCancel
                 disabled={deleteMutation.status === "pending"}
                 onClick={() => setDeleteTarget(null)}
+                className="min-h-[38px]"
               >
                 Bekor qilish
               </AlertDialogCancel>
               <AlertDialogAction
                 disabled={deleteMutation.status === "pending"}
                 onClick={() => deleteMutation.mutate(deleteTarget.id!)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 min-h-[38px]"
               >
                 {deleteMutation.status === "pending"
                   ? "O'chirilmoqda..."
